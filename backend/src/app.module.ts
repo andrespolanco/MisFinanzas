@@ -9,6 +9,8 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/strategies/roles.guard';
+import { SeedService } from './seed/seed.service';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -29,11 +31,12 @@ import { RolesGuard } from './auth/strategies/roles.guard';
     UsersModule,
     TransactionsModule,
     CategoriesModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,
     useClass: RolesGuard,
-  }],
+  }, SeedService],
 })
 export class AppModule {}
