@@ -1,5 +1,6 @@
 "use client";
 import { LoginForm } from "@/components/login-form";
+import { ModeToggle } from "@/components/mode-toggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -27,6 +28,11 @@ export default function LoginPage() {
       <div className="w-full max-w-sm md:max-w-3xl">
         <LoginForm />
       </div>
+      {/* <--Modo oscuro--> */}
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
+      {/* <--Modo oscuro--> */}
     </div>
   );
 }

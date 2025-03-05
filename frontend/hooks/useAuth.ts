@@ -14,7 +14,7 @@ export function useAuth() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:3000/api/finanzas/auth/login", {
+      const response = await fetch("http://192.168.1.5:3000/api/finanzas/auth/login", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -37,7 +37,7 @@ export function useAuth() {
 
   const checkSession = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/finanzas/auth/validate-session", {
+      const res = await fetch("http://192.168.1.5:3000/api/finanzas/auth/validate-session", {
         credentials: "include",
       });
 
@@ -56,7 +56,7 @@ export function useAuth() {
   const logout = async () => {
     setLoading(true);
     try {
-      await fetch("http://localhost:3000/api/finanzas/auth/logout", {
+      await fetch("http://192.168.1.5:3000/api/finanzas/auth/logout", {
         method: "POST",
         credentials: "include",
       });
