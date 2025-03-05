@@ -12,6 +12,6 @@ import { CategoriesModule } from 'src/categories/categories.module';
   CategoriesModule],
   controllers: [TransactionsController],
   providers: [TransactionsService],
-  exports: [TransactionsService], // Exportar si otros módulos lo necesitan
+  exports: [TransactionsService, TypeOrmModule], // Exportar si otros módulos lo necesitan
 })
 export class TransactionsModule {}
