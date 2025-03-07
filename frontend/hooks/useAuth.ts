@@ -29,7 +29,7 @@ export function useAuth() {
       }
 
       setIsAuthenticated(true);
-      router.replace("/dashboard2"); // 🔹 Permite regresar atrás
+      router.replace("/dashboard"); // 🔹 Permite regresar atrás
     } catch (err: any) {
       setError(err.message || "Error en el login. Intenta nuevamente.");
     } finally {
