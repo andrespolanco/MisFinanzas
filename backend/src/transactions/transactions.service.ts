@@ -47,12 +47,30 @@ export class TransactionsService {
     return this.transactionsRepository.save(transaction);
   }
 
-  async findAll(userId: string) {
+  async findAll(userId: string, page: number = 1, limit: number = 10) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-        throw new Error('Usuario no encontrado'); // Manejo de error si el usuario no existe
+      throw new Error("Usuario no encontrado");
     }
-    return this.transactionsRepository.find({ where: { user } , relations: ['user', 'category'] });
+  
+    // Calculamos el `skip`
+    const skip = (page - 1) * limit;
+  
+    // Buscamos las transacciones con paginación
+    const [transactions, total] = await this.transactionsRepository.findAndCount({
+      where: { user },
+      relations: ["user", "category"],
+      order: { date: "DESC" }, // Ordenamos por fecha descendente
+      take: limit, // Cantidad de registros por página
+      skip: skip, // Cuántos registros saltar
+    });
+  
+    return {
+      data: transactions,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
   
   async findOne(userId: string, id: string) {
@@ -93,39 +111,76 @@ export class TransactionsService {
     const now = new Date();
     const startDate = toZonedTime(startOfMonth(now), this.timeZone);
     const endDate = toZonedTime(endOfMonth(now), this.timeZone);
-  
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new Error('Usuario no encontrado');
     }
-  
-    return this.getTransactionsByDateRange(userId, startDate, endDate);
+    // Obtener transacciones del mes
+    const transactions = await this.getTransactionsByDateRange(userId, startDate, endDate);
+    // Filtrar ingresos y gastos
+    const incomeTransactions = transactions.filter(tx => tx.category.name === "Ingresos");
+    const expenseTransactions = transactions.filter(tx => tx.category.name !== "Ingresos");
+    // Calcular totales
+    const totalIncomes = incomeTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    const totalExpenses = expenseTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    return { totalExpenses, totalIncomes, transactions }; // Devolvemos la suma junto con las transacciones
   }
 
   async getLastWeekExpenses(userId: string) {
     const now = new Date();
     const startDate = toZonedTime(startOfWeek(now, { weekStartsOn: 1 }), this.timeZone); // Lunes
     const endDate = toZonedTime(endOfWeek(now, { weekStartsOn: 1 }), this.timeZone); // Domingo
-
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new Error('Usuario no encontrado');
     }
-
-    return this.getTransactionsByDateRange(userId, startDate, endDate);
+    const transactions = await this.getTransactionsByDateRange(userId, startDate, endDate);
+    // Filtrar ingresos y gastos
+    const incomeTransactions = transactions.filter(tx => tx.category.name === "Ingresos");
+    const expenseTransactions = transactions.filter(tx => tx.category.name !== "Ingresos");
+    // Calcular totales
+    const totalIncomes = incomeTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    const totalExpenses = expenseTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    return { totalExpenses, totalIncomes, transactions }; // Devolvemos la suma junto con las transacciones
   }
 
   async getPreviousMonthExpenses(userId: string) {
     const now = new Date();
     const startDate = toZonedTime(startOfMonth(subMonths(now, 1)), this.timeZone);
     const endDate = toZonedTime(endOfMonth(subMonths(now, 1)), this.timeZone);
-
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new Error('Usuario no encontrado');
     }
+    const transactions = await this.getTransactionsByDateRange(userId, startDate, endDate);
+    // Filtrar ingresos y gastos
+    const incomeTransactions = transactions.filter(tx => tx.category.name === "Ingresos");
+    const expenseTransactions = transactions.filter(tx => tx.category.name !== "Ingresos");
+    // Calcular totales
+    const totalIncomes = incomeTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    const totalExpenses = expenseTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    return { totalExpenses, totalIncomes, transactions }; // Devolvemos la suma junto con las transacciones
+  }
 
-    return this.getTransactionsByDateRange(userId, startDate, endDate);
+  async getTransactionsByMonth(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+  
+    const transactions = await this.transactionsRepository
+      .createQueryBuilder("transaction")
+      .select("DATE_TRUNC('month', transaction.date)", "month")
+      .addSelect("SUM(transaction.amount)", "total")
+      .where("transaction.userId = :userId", { userId })
+      .groupBy("month")
+      .orderBy("month", "ASC")
+      .getRawMany();
+  
+    return transactions.map((t) => ({
+      name: new Date(t.month).toLocaleString("default", { month: "short" }),
+      total: Number(t.total),
+    }));
   }
 
   private async getTransactionsByDateRange(userId: string, startDate: Date, endDate: Date) {

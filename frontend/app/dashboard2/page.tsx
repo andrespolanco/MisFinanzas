@@ -1,3 +1,5 @@
+"use client";
+
 import { Metadata } from "next"
 import Image from "next/image"
 
@@ -18,17 +20,67 @@ import {
 import { CalendarDateRangePicker } from "@/app/dashboard2/components/date-range-picker"
 import { MainNav } from "@/app/dashboard2/components/main-nav"
 import { Overview } from "@/app/dashboard2/components/overview"
-import { RecentSales } from "@/app/dashboard2/components/recent-sales"
+import { RecentTransactions } from "@/app/dashboard2/components/recent-transactions"
 import { Search } from "@/app/dashboard2/components/search"
 import TeamSwitcher from "@/app/dashboard2/components/team-switcher"
 import { UserNav } from "@/app/dashboard2/components/user-nav"
-
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Example dashboard app built using the components.",
-}
+import { useAuth } from "@/hooks/useAuth"; // Asegúrate de que la ruta sea correcta
+import { useEffect, useState } from "react";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function DashboardPage() {
+
+  const {
+    getCurrentMonthExpenses,
+    getLastWeekExpenses,
+    getPreviousMonthExpenses,
+    getRecentTransactions, // Agregado
+    getTransactionsByMonth,
+  } = useAuth();
+  // Estados
+  const [currentMonthExpenses, setCurrentMonthExpenses] = useState<number>(0);
+  const [currentMonthIncome, setCurrentMonthIncome] = useState<number>(0);
+  const [previousExpenses, setPreviousExpenses] = useState<number>(0);
+  const [weeklyExpenses, setWeeklyExpenses] = useState<number>(0);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]); // Transacciones recientes
+  const [transactionByMonth, setTransactionByMonth] = useState<{ name: string; total: number }[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [currentMonth, previousMonth, currentWeek, recentTransactions, transactionByMonth] = await Promise.all([
+          getCurrentMonthExpenses(),
+          getPreviousMonthExpenses(),
+          getLastWeekExpenses(),
+          getRecentTransactions(),
+          getTransactionsByMonth(),
+        ]);
+        console.log("Datos recibidos para el gráfico:", transactionByMonth); // Verifica si llegan datos
+
+        if (currentMonth) {
+          setCurrentMonthExpenses(currentMonth.totalExpenses || 0);
+          setCurrentMonthIncome(currentMonth.totalIncomes || 0);
+        }
+        if (previousMonth) {
+          setPreviousExpenses(previousMonth.totalExpenses || 0);
+        }
+        if (currentWeek) {
+          setWeeklyExpenses(currentWeek.totalExpenses || 0);
+        }
+        if (recentTransactions) {
+          setRecentTransactions(recentTransactions.data || []); // Guardamos las últimas 7 transacciones
+        }
+        if (transactionByMonth) {
+          setTransactionByMonth(transactionByMonth || []); // Guardamos las transacciones por mes
+        }
+      } catch (error) {
+        console.error("Error al obtener datos:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <>
       <div className="flex-col md:flex">
@@ -36,6 +88,7 @@ export default function DashboardPage() {
           <div className="flex h-16 items-center px-4">
             <MainNav className="mx-6" />
             <div className="ml-auto flex items-center space-x-4">
+              <ModeToggle />
               <UserNav />
             </div>
           </div>
@@ -83,7 +136,7 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">$45,231.89</div>
+                    <div className="text-2xl font-bold">S/. {currentMonthIncome}</div>
                     <p className="text-xs text-muted-foreground">
                       +20.1% from last month
                     </p>
@@ -110,7 +163,7 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">+2350</div>
+                    <div className="text-2xl font-bold">S/. {currentMonthExpenses}</div>
                     <p className="text-xs text-muted-foreground">
                       +180.1% from last month
                     </p>
@@ -134,7 +187,7 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">+12,234</div>
+                    <div className="text-2xl font-bold">S/. {weeklyExpenses}</div>
                     <p className="text-xs text-muted-foreground">
                       +19% from last month
                     </p>
@@ -159,7 +212,7 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">+573</div>
+                    <div className="text-2xl font-bold">S/. {previousExpenses}</div>
                     <p className="text-xs text-muted-foreground">
                       +201 since last hour
                     </p>
@@ -172,18 +225,18 @@ export default function DashboardPage() {
                     <CardTitle>Overview</CardTitle>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <Overview />
+                    <Overview transactionByMonth={transactionByMonth} />
                   </CardContent>
                 </Card>
                 <Card className="col-span-4 md:col-span-3">
                   <CardHeader>
-                    <CardTitle>Recent Sales</CardTitle>
+                    <CardTitle>Ultimas transacciones</CardTitle>
                     <CardDescription>
-                      You made 265 sales this month.
+                      Has realizado 265 transacciones este mes.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <RecentSales />
+                    <RecentTransactions recentTransactions={recentTransactions}/>
                   </CardContent>
                 </Card>
               </div>
