@@ -67,7 +67,7 @@ export default function DashboardPage() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                      Total Revenue
+                      Ingresos del mes
                     </CardTitle>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +92,7 @@ export default function DashboardPage() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                      Subscriptions
+                      Gastos del mes
                     </CardTitle>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +118,7 @@ export default function DashboardPage() {
                 </Card>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Sales</CardTitle>
+                    <CardTitle className="text-sm font-medium">Gastos de de la semana</CardTitle>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                      Active Now
+                      Gasto del mes anterior
                     </CardTitle>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

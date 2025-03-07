@@ -33,9 +33,23 @@ const seedUsers = [
 ];
 
 const seedTransactions = [
-  { amount: 150.75, description: 'Compra en supermercado', date: new Date('2025-02-14T21:30:00.000Z'), categoryName: 'Alimentación', userEmail: 'josepolancog20@gmail.com', paymentMethod: PaymentMethod.CASH },
-  { amount: 50.0, description: 'Suscripción Netflix', date: new Date('2025-02-01T00:00:00.000Z'), categoryName: 'Suscripciones', userEmail: 'josepolancog20@gmail.com', paymentMethod: PaymentMethod.CARD_IBK}
-];
+  { amount: 150.75, description: 'Compra en supermercado', date: new Date('2025-03-05T10:30:00.000Z'), categoryName: 'Alimentación', userEmail: 'josepolancog20@gmail.com', paymentMethod: PaymentMethod.CASH },
+  { amount: 50.0, description: 'Suscripción Netflix', date: new Date('2025-03-01T00:00:00.000Z'), categoryName: 'Suscripciones', userEmail: 'josepolancog20@gmail.com', paymentMethod: PaymentMethod.CARD_IBK },
+  ...Array.from({ length: 58 }, (_, i) => {
+    const day = (i % 28) + 1; // Asegurar que el día esté entre 1 y 28
+    const month = i % 2 === 0 ? '03' : '02'; // Alternando entre marzo y febrero
+    const dateStr = `2025-${month}-${day.toString().padStart(2, '0')}T12:00:00.000Z`;
+    
+    return {
+      amount: Math.floor(Math.random() * 200) + 10, // Monto aleatorio entre 10 y 210
+      description: `Compra aleatoria ${i + 3}`,
+      date: new Date(dateStr), // Convertir en objeto Date
+      categoryName: ['Alimentación', 'Transporte', 'Entretenimiento', 'Educación'][i % 4],
+      userEmail: 'usuario1@gmail.com',
+      paymentMethod: Object.values(PaymentMethod)[i % Object.values(PaymentMethod).length],
+    };
+  })
+].filter(t => !isNaN(t.date.getTime())); // Filtrar fechas inválidas
 
 @Injectable()
 export class SeedService {

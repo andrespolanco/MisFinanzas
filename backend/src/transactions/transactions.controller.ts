@@ -34,4 +34,19 @@ export class TransactionsController {
   remove(@Request() req, @Param('id') id: string) {
     return this.transactionsService.remove(req.user.id, id);
   }
+
+  @Get('current-month/expenses')
+  getCurrentMonthExpenses(@Request() req) {
+    return this.transactionsService.getCurrentMonthExpenses(req.user.id);
+  }
+
+  @Get('last-week/expenses')
+  getLastWeekExpenses(@Request() req) {
+    return this.transactionsService.getLastWeekExpenses(req.user.id);
+  }
+
+  @Get('previous-month/expenses')
+  getPreviousMonthExpenses(@Request() req) {
+    return this.transactionsService.getPreviousMonthExpenses(req.user.id);
+  }
 }
