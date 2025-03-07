@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpCode} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpCode, Query} from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -13,10 +13,16 @@ export class TransactionsController {
   create(@Request() req, @Body() createTransactionDto: CreateTransactionDto) {
     return this.transactionsService.create(req.user.id, createTransactionDto);
   }
-
+  
   @Get()
-  findAll(@Request() req) {
-    return this.transactionsService.findAll(req.user.id);
+  findAll(
+    @Request() req,
+    @Query("page") page: string,
+    @Query("limit") limit: string
+  ) {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.transactionsService.findAll(req.user.id, pageNumber, limitNumber);
   }
 
   @Get(':id')
@@ -48,5 +54,10 @@ export class TransactionsController {
   @Get('previous-month/expenses')
   getPreviousMonthExpenses(@Request() req) {
     return this.transactionsService.getPreviousMonthExpenses(req.user.id);
+  }
+
+  @Get("/transactions-by-month/expenses")
+  async getTransactionsByMonth(@Request() req) {
+    return this.transactionsService.getTransactionsByMonth(req.user.id);
   }
 }

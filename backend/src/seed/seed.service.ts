@@ -17,6 +17,7 @@ const seedCategories = [
   { name: 'Educación', description: 'Inversión en cursos, libros, membresías de aprendizaje y material educativo.' },
   { name: 'Fitness', description: 'Gastos en gimnasio, suplementos, equipamiento deportivo y entrenamientos.' },
   { name: 'Deudas y Finanzas', description: 'Pago de tarjetas de crédito, préstamos, inversiones y comisiones bancarias.' },
+  { name: 'Ingresos', description: 'Ingreso de fondos, sueldos, pagos y deudas' },
 ];
 
 const seedUsers = [
@@ -44,7 +45,7 @@ const seedTransactions = [
       amount: Math.floor(Math.random() * 200) + 10, // Monto aleatorio entre 10 y 210
       description: `Compra aleatoria ${i + 3}`,
       date: new Date(dateStr), // Convertir en objeto Date
-      categoryName: ['Alimentación', 'Transporte', 'Entretenimiento', 'Educación'][i % 4],
+      categoryName: ['Alimentación', 'Transporte', 'Entretenimiento', 'Educación', 'Ingresos'][i % 5],
       userEmail: 'usuario1@gmail.com',
       paymentMethod: Object.values(PaymentMethod)[i % Object.values(PaymentMethod).length],
     };

@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+const API_BASE_URL = "http://192.168.1.5:3000/api/finanzas";
+
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ export function useAuth() {
     setError(null);
 
     try {
-      const response = await fetch("http://192.168.1.5:3000/api/finanzas/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -26,8 +28,8 @@ export function useAuth() {
         throw new Error(data.message || "Credenciales inválidas");
       }
 
-      setIsAuthenticated(true); // 🔹 Establece el estado como autenticado
-      router.replace("/dashboard");
+      setIsAuthenticated(true);
+      router.replace("/dashboard2"); // 🔹 Permite regresar atrás
     } catch (err: any) {
       setError(err.message || "Error en el login. Intenta nuevamente.");
     } finally {
@@ -37,16 +39,12 @@ export function useAuth() {
 
   const checkSession = async () => {
     try {
-      const res = await fetch("http://192.168.1.5:3000/api/finanzas/auth/validate-session", {
+      const res = await fetch(`${API_BASE_URL}/auth/validate-session`, {
         credentials: "include",
       });
 
-      if (res.ok) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-      }
-    } catch (error) {
+      setIsAuthenticated(res.ok);
+    } catch {
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
@@ -56,13 +54,13 @@ export function useAuth() {
   const logout = async () => {
     setLoading(true);
     try {
-      await fetch("http://192.168.1.5:3000/api/finanzas/auth/logout", {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
 
       setIsAuthenticated(false);
-      router.replace("/login"); // Redirigir al login después del logout
+      router.push("/login");
     } catch (err: any) {
       console.error("Error al cerrar sesión", err);
     } finally {
@@ -70,9 +68,99 @@ export function useAuth() {
     }
   };
 
+  const getCurrentMonthExpenses = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/transactions/current-month/expenses`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Error al obtener las transacciones");
+
+      const data = await response.json();
+      console.log("Gastos del mes actual:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const getLastWeekExpenses = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/transactions/last-week/expenses`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Error al obtener las transacciones");
+
+      const data = await response.json();
+      console.log("Gastos del mes actual:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const getPreviousMonthExpenses = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/transactions/previous-month/expenses`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Error al obtener las transacciones");
+
+      const data = await response.json();
+      console.log("Gastos del mes actual:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const getRecentTransactions = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/transactions?page=1&limit=7`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Error al obtener las transacciones");
+
+      const data = await response.json();
+      console.log("Gastos del mes actual:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const getTransactionsByMonth = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/transactions/transactions-by-month/expenses`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Error al obtener las transacciones");
+
+      const data = await response.json();
+      console.log("Gastos del mes actual:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     checkSession();
   }, []);
 
-  return { login, logout, isAuthenticated, loading, error };
+  return { login, logout, isAuthenticated, loading, error, getCurrentMonthExpenses, getLastWeekExpenses, getPreviousMonthExpenses , getRecentTransactions, getTransactionsByMonth};
 }
